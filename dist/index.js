@@ -49212,6 +49212,9 @@ function get(isRetry) {
         packages: (0, core_1.getMultilineInput)('packages', { required: true }),
         version: (0, core_1.getInput)('version', { required: true }),
         branch: (0, core_1.getInput)('branch') || undefined,
+        baseBranch: (0, core_1.getInput)('base_branch') || undefined,
+        lastPushEventOnly: (0, core_1.getInput)('last_push_event_only') || undefined,
+        githubToken: (0, core_1.getInput)('token'),
         overwriteMode
     };
     const errors = [];
@@ -49262,12 +49265,34 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
         }
         const repoUri = `${github_1.context.serverUrl}/${github_1.context.repo.owner}/${github_1.context.repo.repo}`;
         const pushEvent = github_1.context.payload;
-        const commits = ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
-            return {
-                Id: commit.id,
-                Comment: commit.message
-            };
-        })) || [];
+        const lastPushEventOnly = parameters.lastPushEventOnly || true;
+        let commits;
+        if (lastPushEventOnly) {
+            commits =
+                ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
+                    return {
+                        Id: commit.id,
+                        Comment: commit.message
+                    };
+                })) || [];
+        }
+        else {
+            const baseBranch = parameters.baseBranch || 'master';
+            const githubToken = parameters.githubToken;
+            const octokit = (0, github_1.getOctokit)(githubToken);
+            const result = yield octokit.rest.repos.compareCommits({
+                repo: github_1.context.repo.repo,
+                owner: github_1.context.repo.owner,
+                head: branch,
+                base: baseBranch,
+                per_page: 100
+            });
+            commits =
+                result.data.commits.map(commit => ({
+                    Id: commit.sha,
+                    Comment: commit.commit.message
+                })) || [];
+        }
         const packages = [];
         for (const packageId of parameters.packages) {
             packages.push({

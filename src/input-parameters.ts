@@ -20,6 +20,9 @@ export interface InputParameters {
   packages: string[]
   version: string
   branch?: string
+  baseBranch?: string
+  lastPushEventOnly?: string
+  githubToken: string
   overwriteMode: OverwriteMode
 }
 
@@ -36,6 +39,9 @@ export function get(isRetry: boolean): InputParameters {
     packages: getMultilineInput('packages', { required: true }),
     version: getInput('version', { required: true }),
     branch: getInput('branch') || undefined,
+    baseBranch: getInput('base_branch') || undefined,
+    lastPushEventOnly: getInput('last_push_event_only') || undefined,
+    githubToken: getInput('token'),
     overwriteMode
   }
 

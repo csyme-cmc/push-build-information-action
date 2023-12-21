@@ -1,5 +1,5 @@
 import { isDebug } from '@actions/core'
-import { context } from '@actions/github'
+import { context, getOctokit } from '@actions/github'
 import { Commit, PushEvent } from '@octokit/webhooks-types/schema'
 import {
   BuildInformationRepository,
@@ -23,13 +23,39 @@ export async function pushBuildInformationFromInputs(
 
   const repoUri = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`
   const pushEvent = context.payload as PushEvent | undefined
-  const commits: IOctopusBuildInformationCommit[] =
-    pushEvent?.commits?.map((commit: Commit) => {
-      return {
-        Id: commit.id,
-        Comment: commit.message
-      }
-    }) || []
+
+  const lastPushEventOnly = parameters.lastPushEventOnly || true
+  let commits: IOctopusBuildInformationCommit[]
+
+  if (lastPushEventOnly) {
+    // If lastPushEventOnly is true, retrieve commits from the last push event
+    commits =
+      pushEvent?.commits?.map((commit: Commit) => {
+        return {
+          Id: commit.id,
+          Comment: commit.message
+        }
+      }) || []
+  } else {
+    const baseBranch: string = parameters.baseBranch || 'master'
+    const githubToken = parameters.githubToken
+    const octokit = getOctokit(githubToken)
+
+    // Get the list of commits between the two branches
+    const result = await octokit.rest.repos.compareCommits({
+      repo: context.repo.repo,
+      owner: context.repo.owner,
+      head: branch,
+      base: baseBranch,
+      per_page: 100
+    })
+
+    commits =
+      result.data.commits.map(commit => ({
+        Id: commit.sha,
+        Comment: commit.commit.message
+      })) || []
+  }
 
   const packages: PackageIdentity[] = []
   for (const packageId of parameters.packages) {

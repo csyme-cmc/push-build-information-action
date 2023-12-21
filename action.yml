@@ -21,6 +21,14 @@ inputs:
     description: 'The base URL hosting Octopus Deploy (i.e. "https://octopus.example.com/"). It is recommended to retrieve this value from an environment variable.'
   space:
     description: 'The name or ID of a space within which this command will be executed. If omitted, the default space will be used.'
+  base_branch:
+    default: 'Master'
+    description: 'The base branch to compare the commits to. Used when last_push_event_only is false'
+  last_push_event_only:
+    default: true
+    description: 'Only retrieve the last commit'
+  token:
+    description: 'GitHub_Token used for API call. Used when last_push_event_only is false '
 
 runs:
   using: 'node20'
