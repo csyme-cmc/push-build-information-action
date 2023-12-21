@@ -51,14 +51,13 @@ export async function pushBuildInformationFromInputs(
       repo: context.repo.repo,
       owner: context.repo.owner,
       head: branch,
-      base: baseBranch,
-      per_page: 100
+      base: baseBranch
     })
 
     client.debug('After compareCommits call')
 
     commits =
-      result.data.commits.map(commit => ({
+      result.data.commits.reverse().map(commit => ({
         Id: commit.sha,
         Comment: commit.commit.message
       })) || []
