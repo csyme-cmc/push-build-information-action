@@ -38,7 +38,7 @@ export async function pushBuildInformationFromInputs(
       }) || []
   } else {
     // Get the list of commits between the two branches
-    const baseBranch: string = parameters.baseBranch || 'master'
+    const baseBranch = parameters.baseBranch || 'master'
     const octokit = getOctokit(parameters.githubToken)
 
     client.debug('Before compareCommits call')
