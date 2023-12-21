@@ -49265,9 +49265,9 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
         }
         const repoUri = `${github_1.context.serverUrl}/${github_1.context.repo.owner}/${github_1.context.repo.repo}`;
         const pushEvent = github_1.context.payload;
-        const lastPushEventOnly = parameters.lastPushEventOnly || true;
+        const lastPushEventOnly = parameters.lastPushEventOnly || 'true';
         let commits;
-        if (lastPushEventOnly) {
+        if (lastPushEventOnly.toLowerCase() === 'true') {
             commits =
                 ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
                     return {
