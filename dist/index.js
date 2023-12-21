@@ -49278,8 +49278,12 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
         }
         else {
             const baseBranch = parameters.baseBranch || 'master';
-            const githubToken = parameters.githubToken;
-            const octokit = (0, github_1.getOctokit)(githubToken);
+            const octokit = (0, github_1.getOctokit)(parameters.githubToken);
+            client.debug('Before compareCommits call');
+            client.debug(`Repo: ${github_1.context.repo.repo}`);
+            client.debug(`Owner: ${github_1.context.repo.owner}`);
+            client.debug(`Head: ${branch}`);
+            client.debug(`Base: ${baseBranch}`);
             const result = yield octokit.rest.repos.compareCommits({
                 repo: github_1.context.repo.repo,
                 owner: github_1.context.repo.owner,
@@ -49287,6 +49291,7 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
                 base: baseBranch,
                 per_page: 100
             });
+            client.debug('After compareCommits call');
             commits =
                 result.data.commits.map(commit => ({
                     Id: commit.sha,

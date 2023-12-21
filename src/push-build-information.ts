@@ -37,11 +37,16 @@ export async function pushBuildInformationFromInputs(
         }
       }) || []
   } else {
-    const baseBranch: string = parameters.baseBranch || 'master'
-    const githubToken = parameters.githubToken
-    const octokit = getOctokit(githubToken)
-
     // Get the list of commits between the two branches
+    const baseBranch: string = parameters.baseBranch || 'master'
+    const octokit = getOctokit(parameters.githubToken)
+
+    client.debug('Before compareCommits call')
+    client.debug(`Repo: ${context.repo.repo}`)
+    client.debug(`Owner: ${context.repo.owner}`)
+    client.debug(`Head: ${branch}`)
+    client.debug(`Base: ${baseBranch}`)
+
     const result = await octokit.rest.repos.compareCommits({
       repo: context.repo.repo,
       owner: context.repo.owner,
@@ -49,6 +54,8 @@ export async function pushBuildInformationFromInputs(
       base: baseBranch,
       per_page: 100
     })
+
+    client.debug('After compareCommits call')
 
     commits =
       result.data.commits.map(commit => ({
