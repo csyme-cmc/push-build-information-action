@@ -21,7 +21,7 @@ export interface InputParameters {
   version: string
   branch?: string
   baseBranch?: string
-  lastPushEventOnly?: string
+  commits?: string
   githubToken: string
   overwriteMode: OverwriteMode
 }
@@ -40,7 +40,7 @@ export function get(isRetry: boolean): InputParameters {
     version: getInput('version', { required: true }),
     branch: getInput('branch') || undefined,
     baseBranch: getInput('base_branch') || undefined,
-    lastPushEventOnly: getInput('last_push_event_only') || undefined,
+    commits: getInput('commits') || undefined,
     githubToken: getInput('token'),
     overwriteMode
   }
@@ -62,6 +62,10 @@ export function get(isRetry: boolean): InputParameters {
     errors.push(
       "The Octopus space name is required, please specify explicitly through the 'space' input or set the OCTOPUS_SPACE environment variable."
     )
+  }
+
+  if (!parameters.commits && parameters.commits !== 'last|all') {
+    errors.push("The 'commits' parameter must be either 'last' or 'all'.")
   }
 
   if (errors.length > 0) {

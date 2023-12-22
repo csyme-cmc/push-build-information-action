@@ -49213,7 +49213,7 @@ function get(isRetry) {
         version: (0, core_1.getInput)('version', { required: true }),
         branch: (0, core_1.getInput)('branch') || undefined,
         baseBranch: (0, core_1.getInput)('base_branch') || undefined,
-        lastPushEventOnly: (0, core_1.getInput)('last_push_event_only') || undefined,
+        commits: (0, core_1.getInput)('commits') || undefined,
         githubToken: (0, core_1.getInput)('token'),
         overwriteMode
     };
@@ -49226,6 +49226,9 @@ function get(isRetry) {
     }
     if (!parameters.space) {
         errors.push("The Octopus space name is required, please specify explicitly through the 'space' input or set the OCTOPUS_SPACE environment variable.");
+    }
+    if (!parameters.commits && parameters.commits !== 'last|all') {
+        errors.push("The 'commits' parameter must be either 'last' or 'all'.");
     }
     if (errors.length > 0) {
         throw new Error(errors.join('\n'));
@@ -49265,9 +49268,9 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
         }
         const repoUri = `${github_1.context.serverUrl}/${github_1.context.repo.owner}/${github_1.context.repo.repo}`;
         const pushEvent = github_1.context.payload;
-        const lastPushEventOnly = parameters.lastPushEventOnly || 'true';
+        const listCommits = parameters.commits;
         let commits;
-        if (lastPushEventOnly.toLowerCase() === 'true') {
+        if (listCommits === 'last') {
             commits =
                 ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
                     return {
@@ -49277,20 +49280,14 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
                 })) || [];
         }
         else {
-            const baseBranch = parameters.baseBranch || 'master';
+            const baseBranch = parameters.baseBranch || '';
             const octokit = (0, github_1.getOctokit)(parameters.githubToken);
-            client.debug('Before compareCommits call');
-            client.debug(`Repo: ${github_1.context.repo.repo}`);
-            client.debug(`Owner: ${github_1.context.repo.owner}`);
-            client.debug(`Head: ${branch}`);
-            client.debug(`Base: ${baseBranch}`);
             const result = yield octokit.rest.repos.compareCommits({
                 repo: github_1.context.repo.repo,
                 owner: github_1.context.repo.owner,
                 head: branch,
                 base: baseBranch
             });
-            client.debug('After compareCommits call');
             commits =
                 result.data.commits.reverse().map(commit => ({
                     Id: commit.sha,

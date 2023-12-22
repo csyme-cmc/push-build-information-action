@@ -24,11 +24,11 @@ export async function pushBuildInformationFromInputs(
   const repoUri = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`
   const pushEvent = context.payload as PushEvent | undefined
 
-  const lastPushEventOnly = parameters.lastPushEventOnly || 'true'
+  const listCommits = parameters.commits
   let commits: IOctopusBuildInformationCommit[]
 
-  if (lastPushEventOnly.toLowerCase() === 'true') {
-    // If lastPushEventOnly is true, retrieve commits from the last push event
+  if (listCommits === 'last') {
+    // Retrieve commits from the last push event
     commits =
       pushEvent?.commits?.map((commit: Commit) => {
         return {
@@ -38,14 +38,8 @@ export async function pushBuildInformationFromInputs(
       }) || []
   } else {
     // Get the list of commits between the two branches
-    const baseBranch = parameters.baseBranch || 'master'
+    const baseBranch = parameters.baseBranch || '' // default value set via action.yml
     const octokit = getOctokit(parameters.githubToken)
-
-    client.debug('Before compareCommits call')
-    client.debug(`Repo: ${context.repo.repo}`)
-    client.debug(`Owner: ${context.repo.owner}`)
-    client.debug(`Head: ${branch}`)
-    client.debug(`Base: ${baseBranch}`)
 
     const result = await octokit.rest.repos.compareCommits({
       repo: context.repo.repo,
@@ -53,8 +47,6 @@ export async function pushBuildInformationFromInputs(
       head: branch,
       base: baseBranch
     })
-
-    client.debug('After compareCommits call')
 
     commits =
       result.data.commits.reverse().map(commit => ({
