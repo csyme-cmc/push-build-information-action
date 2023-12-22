@@ -64,9 +64,9 @@ export function get(isRetry: boolean): InputParameters {
     )
   }
 
-  if (!parameters.commits && parameters.commits !== 'last|all') {
-    errors.push("The 'commits' parameter must be either 'last' or 'all'.")
-  }
+  if (typeof parameters.commits !== 'undefined' && parameters.commits !== 'last|all') {
+    errors.push("The 'commits' parameter must be either 'last' or 'all'.");
+  }  
 
   if (errors.length > 0) {
     throw new Error(errors.join('\n'))
