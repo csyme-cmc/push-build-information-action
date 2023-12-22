@@ -24,10 +24,10 @@ export async function pushBuildInformationFromInputs(
   const repoUri = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`
   const pushEvent = context.payload as PushEvent | undefined
 
-  const listCommits = parameters.commits
+  const lastCommit = parameters.lastCommit
   let commits: IOctopusBuildInformationCommit[]
 
-  if (listCommits === 'last') {
+  if (lastCommit) {
     // Retrieve commits from the last push event
     commits =
       pushEvent?.commits?.map((commit: Commit) => {

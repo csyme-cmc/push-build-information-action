@@ -1,4 +1,4 @@
-import { getInput, getMultilineInput } from '@actions/core'
+import { getInput, getMultilineInput, getBooleanInput } from '@actions/core'
 import { OverwriteMode } from '@octopusdeploy/api-client'
 
 const EnvironmentVariables = {
@@ -21,7 +21,7 @@ export interface InputParameters {
   version: string
   branch?: string
   baseBranch?: string
-  commits?: string
+  lastCommit?: boolean
   githubToken: string
   overwriteMode: OverwriteMode
 }
@@ -40,7 +40,7 @@ export function get(isRetry: boolean): InputParameters {
     version: getInput('version', { required: true }),
     branch: getInput('branch') || undefined,
     baseBranch: getInput('base_branch') || undefined,
-    commits: getInput('commits') || undefined,
+    lastCommit: getBooleanInput('last_commit_only') || undefined,
     githubToken: getInput('token'),
     overwriteMode
   }
@@ -63,10 +63,6 @@ export function get(isRetry: boolean): InputParameters {
       "The Octopus space name is required, please specify explicitly through the 'space' input or set the OCTOPUS_SPACE environment variable."
     )
   }
-
-  if (typeof parameters.commits !== 'undefined' && parameters.commits !== 'last|all') {
-    errors.push("The 'commits' parameter must be either 'last' or 'all'.");
-  }  
 
   if (errors.length > 0) {
     throw new Error(errors.join('\n'))
