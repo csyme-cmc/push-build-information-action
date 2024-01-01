@@ -49275,7 +49275,7 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
                 head: branch,
                 base: baseBranch
             }, response => response.data.commits.map(commit => ({
-                sha: commit.node_id,
+                sha: commit.sha,
                 message: commit.commit.message
             })));
             commits = commitDetails
