@@ -48,10 +48,12 @@ export async function pushBuildInformationFromInputs(
     )
 
     // Map commits from the comparison result
-    commits = commitDetails.flatMap(commit => ({
-      Id: commit.sha,
-      Comment: commit.message
-    }))
+    commits = commitDetails
+      .flatMap(commit => ({
+        Id: commit.sha,
+        Comment: commit.message
+      }))
+      .reverse() // Octokit returns reverse order so need to make newest commit is first)
   } else {
     client.debug('Obtaining last commit if push event')
     // Retrieve commit from the last push event

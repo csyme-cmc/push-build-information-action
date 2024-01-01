@@ -49278,10 +49278,12 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
                 sha: commit.node_id,
                 message: commit.commit.message
             })));
-            commits = commitDetails.flatMap(commit => ({
+            commits = commitDetails
+                .flatMap(commit => ({
                 Id: commit.sha,
                 Comment: commit.message
-            }));
+            }))
+                .reverse();
         }
         else {
             client.debug('Obtaining last commit if push event');
