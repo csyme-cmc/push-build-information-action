@@ -49213,7 +49213,7 @@ function get(isRetry) {
         version: (0, core_1.getInput)('version', { required: true }),
         branch: (0, core_1.getInput)('branch') || undefined,
         baseBranch: (0, core_1.getInput)('base_branch') || undefined,
-        githubToken: (0, core_1.getInput)('token'),
+        githubToken: (0, core_1.getInput)('github_token'),
         overwriteMode
     };
     const errors = [];
@@ -49264,9 +49264,10 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
         }
         const repoUri = `${github_1.context.serverUrl}/${github_1.context.repo.owner}/${github_1.context.repo.repo}`;
         const pushEvent = github_1.context.payload;
-        const baseBranch = parameters.baseBranch || '';
+        const baseBranch = parameters.baseBranch;
         let commits;
-        if (!baseBranch == null) {
+        if (baseBranch) {
+            client.debug(`Comparing branches ${branch} and ${baseBranch} to obtain a list of commits`);
             const octokit = (0, github_1.getOctokit)(parameters.githubToken);
             const result = yield octokit.rest.repos.compareCommits({
                 repo: github_1.context.repo.repo,
@@ -49282,6 +49283,7 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
                 })) || [];
         }
         else {
+            client.debug('Obtaining last commit if push');
             commits =
                 ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
                     return {
