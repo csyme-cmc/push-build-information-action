@@ -47,7 +47,7 @@ export async function pushBuildInformationFromInputs(
         Comment: commit.commit.message
       })) || []
   } else {
-    client.debug('Obtaining last commit if push')
+    client.debug('Obtaining last commit if push event')
     // Retrieve commit from the last push event
     commits =
       pushEvent?.commits?.map((commit: Commit) => {

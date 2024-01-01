@@ -49283,7 +49283,7 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
                 })) || [];
         }
         else {
-            client.debug('Obtaining last commit if push');
+            client.debug('Obtaining last commit if push event');
             commits =
                 ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
                     return {
