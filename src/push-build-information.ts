@@ -32,31 +32,37 @@ export async function pushBuildInformationFromInputs(
     // Get the list of commits between the two branches
     const octokit = getOctokit(parameters.githubToken)
 
-    const result = await octokit.rest.repos.compareCommits({
-      repo: context.repo.repo,
-      owner: context.repo.owner,
-      head: branch,
-      base: baseBranch,
-      per_page: 10000
-    })
+    const commitDetails = await octokit.paginate(
+      octokit.rest.repos.compareCommits,
+      {
+        repo: context.repo.repo,
+        owner: context.repo.owner,
+        head: branch,
+        base: baseBranch
+      },
+      response =>
+        response.data.commits.map(commit => ({
+          sha: commit.node_id,
+          message: commit.commit.message
+        }))
+    )
 
-    // Reverse (so newest is first) and map commits from the comparison result
-    commits =
-      result.data.commits.reverse().map(commit => ({
-        Id: commit.sha,
-        Comment: commit.commit.message
-      })) || []
+    // Map commits from the comparison result
+    commits = commitDetails.flatMap(commit => ({
+      Id: commit.sha,
+      Comment: commit.message
+    }))
   } else {
     client.debug('Obtaining last commit if push event')
     // Retrieve commit from the last push event
     commits =
-      pushEvent?.commits?.map((commit: Commit) => {
-        return {
-          Id: commit.id,
-          Comment: commit.message
-        }
-      }) || []
+      pushEvent?.commits?.map((commit: Commit) => ({
+        Id: commit.id,
+        Comment: commit.message
+      })) || []
   }
+
+  // Now you can use the 'commits' array outside the if-else block.
 
   const packages: PackageIdentity[] = []
   for (const packageId of parameters.packages) {

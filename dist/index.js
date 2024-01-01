@@ -49269,28 +49269,27 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
         if (baseBranch) {
             client.debug(`Comparing branches ${branch} and ${baseBranch} to obtain a list of commits`);
             const octokit = (0, github_1.getOctokit)(parameters.githubToken);
-            const result = yield octokit.rest.repos.compareCommits({
+            const commitDetails = yield octokit.paginate(octokit.rest.repos.compareCommits, {
                 repo: github_1.context.repo.repo,
                 owner: github_1.context.repo.owner,
                 head: branch,
-                base: baseBranch,
-                per_page: 10000
-            });
-            commits =
-                result.data.commits.reverse().map(commit => ({
-                    Id: commit.sha,
-                    Comment: commit.commit.message
-                })) || [];
+                base: baseBranch
+            }, response => response.data.commits.map(commit => ({
+                sha: commit.node_id,
+                message: commit.commit.message
+            })));
+            commits = commitDetails.flatMap(commit => ({
+                Id: commit.sha,
+                Comment: commit.message
+            }));
         }
         else {
             client.debug('Obtaining last commit if push event');
             commits =
-                ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
-                    return {
-                        Id: commit.id,
-                        Comment: commit.message
-                    };
-                })) || [];
+                ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => ({
+                    Id: commit.id,
+                    Comment: commit.message
+                }))) || [];
         }
         const packages = [];
         for (const packageId of parameters.packages) {
