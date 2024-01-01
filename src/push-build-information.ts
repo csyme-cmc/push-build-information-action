@@ -23,11 +23,11 @@ export async function pushBuildInformationFromInputs(
 
   const repoUri = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`
   const pushEvent = context.payload as PushEvent | undefined
-  const baseBranch = parameters.baseBranch ?? ''
+  const baseBranch = parameters.baseBranch
 
   let commits: IOctopusBuildInformationCommit[]
 
-  if (baseBranch.length > 1) {
+  if (baseBranch) {
     // Get the list of commits between the two branches
     const octokit = getOctokit(parameters.githubToken)
 
