@@ -39,7 +39,7 @@ export function get(isRetry: boolean): InputParameters {
     version: getInput('version', { required: true }),
     branch: getInput('branch') || undefined,
     baseBranch: getInput('base_branch') || undefined,
-    githubToken: getInput('token'),
+    githubToken: getInput('github_token'),
     overwriteMode
   }
 
