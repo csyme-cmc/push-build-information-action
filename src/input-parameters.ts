@@ -1,4 +1,4 @@
-import { getInput, getMultilineInput, getBooleanInput } from '@actions/core'
+import { getInput, getMultilineInput } from '@actions/core'
 import { OverwriteMode } from '@octopusdeploy/api-client'
 
 const EnvironmentVariables = {
@@ -21,7 +21,6 @@ export interface InputParameters {
   version: string
   branch?: string
   baseBranch?: string
-  lastCommit?: boolean
   githubToken: string
   overwriteMode: OverwriteMode
 }
@@ -40,7 +39,6 @@ export function get(isRetry: boolean): InputParameters {
     version: getInput('version', { required: true }),
     branch: getInput('branch') || undefined,
     baseBranch: getInput('base_branch') || undefined,
-    lastCommit: getBooleanInput('last_commit_only') || undefined,
     githubToken: getInput('token'),
     overwriteMode
   }

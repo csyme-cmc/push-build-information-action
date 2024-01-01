@@ -23,29 +23,20 @@ export async function pushBuildInformationFromInputs(
 
   const repoUri = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`
   const pushEvent = context.payload as PushEvent | undefined
+  const baseBranch = parameters.baseBranch || ''
 
-  const lastCommit = parameters.lastCommit
   let commits: IOctopusBuildInformationCommit[]
 
-  if (lastCommit) {
-    // Retrieve commits from the last push event
-    commits =
-      pushEvent?.commits?.map((commit: Commit) => {
-        return {
-          Id: commit.id,
-          Comment: commit.message
-        }
-      }) || []
-  } else {
+  if (!baseBranch == null) {
     // Get the list of commits between the two branches
-    const baseBranch = parameters.baseBranch || '' // default value set via action.yml
     const octokit = getOctokit(parameters.githubToken)
 
     const result = await octokit.rest.repos.compareCommits({
       repo: context.repo.repo,
       owner: context.repo.owner,
       head: branch,
-      base: baseBranch
+      base: baseBranch,
+      per_page: 10000
     })
 
     commits =
@@ -53,6 +44,15 @@ export async function pushBuildInformationFromInputs(
         Id: commit.sha,
         Comment: commit.commit.message
       })) || []
+  } else {
+    // Retrieve commit from the last push event
+    commits =
+      pushEvent?.commits?.map((commit: Commit) => {
+        return {
+          Id: commit.id,
+          Comment: commit.message
+        }
+      }) || []
   }
 
   const packages: PackageIdentity[] = []

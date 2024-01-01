@@ -49213,7 +49213,6 @@ function get(isRetry) {
         version: (0, core_1.getInput)('version', { required: true }),
         branch: (0, core_1.getInput)('branch') || undefined,
         baseBranch: (0, core_1.getInput)('base_branch') || undefined,
-        lastCommit: (0, core_1.getBooleanInput)('last_commit_only') || undefined,
         githubToken: (0, core_1.getInput)('token'),
         overwriteMode
     };
@@ -49265,30 +49264,30 @@ function pushBuildInformationFromInputs(client, runId, parameters) {
         }
         const repoUri = `${github_1.context.serverUrl}/${github_1.context.repo.owner}/${github_1.context.repo.repo}`;
         const pushEvent = github_1.context.payload;
-        const lastCommit = parameters.lastCommit;
+        const baseBranch = parameters.baseBranch || '';
         let commits;
-        if (lastCommit) {
+        if (!baseBranch == null) {
+            const octokit = (0, github_1.getOctokit)(parameters.githubToken);
+            const result = yield octokit.rest.repos.compareCommits({
+                repo: github_1.context.repo.repo,
+                owner: github_1.context.repo.owner,
+                head: branch,
+                base: baseBranch,
+                per_page: 10000
+            });
+            commits =
+                result.data.commits.reverse().map(commit => ({
+                    Id: commit.sha,
+                    Comment: commit.commit.message
+                })) || [];
+        }
+        else {
             commits =
                 ((_a = pushEvent === null || pushEvent === void 0 ? void 0 : pushEvent.commits) === null || _a === void 0 ? void 0 : _a.map((commit) => {
                     return {
                         Id: commit.id,
                         Comment: commit.message
                     };
-                })) || [];
-        }
-        else {
-            const baseBranch = parameters.baseBranch || '';
-            const octokit = (0, github_1.getOctokit)(parameters.githubToken);
-            const result = yield octokit.rest.repos.compareCommits({
-                repo: github_1.context.repo.repo,
-                owner: github_1.context.repo.owner,
-                head: branch,
-                base: baseBranch
-            });
-            commits =
-                result.data.commits.reverse().map(commit => ({
-                    Id: commit.sha,
-                    Comment: commit.commit.message
                 })) || [];
         }
         const packages = [];
