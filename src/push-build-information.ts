@@ -42,7 +42,7 @@ export async function pushBuildInformationFromInputs(
       },
       response =>
         response.data.commits.map(commit => ({
-          sha: commit.node_id,
+          sha: commit.sha,
           message: commit.commit.message
         }))
     )
