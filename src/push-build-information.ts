@@ -23,11 +23,11 @@ export async function pushBuildInformationFromInputs(
 
   const repoUri = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`
   const pushEvent = context.payload as PushEvent | undefined
-  const baseBranch = parameters.baseBranch || ''
+  const baseBranch = parameters.baseBranch ?? ''
 
   let commits: IOctopusBuildInformationCommit[]
 
-  if (baseBranch !== null) {
+  if (baseBranch !== '') {
     // Get the list of commits between the two branches
     const octokit = getOctokit(parameters.githubToken)
 
@@ -39,6 +39,7 @@ export async function pushBuildInformationFromInputs(
       per_page: 10000
     })
 
+    // Reverse (so newest is first) and map commits from the comparison result
     commits =
       result.data.commits.reverse().map(commit => ({
         Id: commit.sha,
