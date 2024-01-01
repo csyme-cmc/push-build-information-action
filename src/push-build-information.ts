@@ -28,6 +28,7 @@ export async function pushBuildInformationFromInputs(
   let commits: IOctopusBuildInformationCommit[]
 
   if (baseBranch) {
+    client.debug(`Comparing branches ${branch} and ${baseBranch} to obtain a list of commits`);
     // Get the list of commits between the two branches
     const octokit = getOctokit(parameters.githubToken)
 
@@ -46,6 +47,7 @@ export async function pushBuildInformationFromInputs(
         Comment: commit.commit.message
       })) || []
   } else {
+    client.debug('Obtaining last commit if push')
     // Retrieve commit from the last push event
     commits =
       pushEvent?.commits?.map((commit: Commit) => {
